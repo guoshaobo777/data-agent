@@ -12,19 +12,19 @@ logging:
 db_meta:
   host: localhost
   port: 3306
-  user: atguigu
-  password: Atguigu.123
+  user: root
+  password: root1234
   database: meta
 
 db_dw:
   host: localhost
   port: 3306
-  user: atguigu
-  password: Atguigu.123
+  user: root
+  password: root1234
   database: dw
 
 qdrant:
-  host: localhost
+  host: 118.25.151.69
   port: 6333
   embedding_size: 1024
 
@@ -35,7 +35,7 @@ embedding:
 
 
 es:
-  host: localhost
+  host: 118.25.151.69
   port: 9200
   index_name: data_agent
 
