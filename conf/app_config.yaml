@@ -38,6 +38,6 @@ es:
 
 
 llm:
-  model_name: gpt-5.2-codex
-  api_key: <api-key>
-  base_url: https://api.openai-proxy.org/v1
+  model_name: qwen3.5-plus
+  api_key: sk-3ef9f81c8e1948459a34d08cc0722818
+  base_url: https://dashscope.aliyuncs.com/compatible-mode/v1
