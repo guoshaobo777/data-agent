@@ -2,15 +2,16 @@ import asyncio
 from argparse import ArgumentParser
 from pathlib import Path
 
+import main
 from app.clients.embedding_client_manager import embedding_client_manager
 from app.clients.mysql_client_manager import meta_mysql_client_manager, dw_mysql_client_manager
 from app.clients.qdrant_client_manager import qdrant_client_manager
 from app.clients.es_client_manager import es_client_manager
-from app.repositories.column_qdrant_repository import ColumnQdrantRepository
-from app.repositories.dw_mysql_repository import DWMySQLRepository
-from app.repositories.meta_mysql_repository import MetaMySQLRepository
-from app.repositories.metric_qdrant_repository import MetricQdrantRepository
-from app.repositories.value_es_repository import ValueESRepository
+from app.repositories.qdrant.column_qdrant_repository import ColumnQdrantRepository
+from app.repositories.mysql.dw.dw_mysql_repository import DWMySQLRepository
+from app.repositories.mysql.meta.meta_mysql_repository import MetaMySQLRepository
+from app.repositories.qdrant.metric_qdrant_repository import MetricQdrantRepository
+from app.repositories.es.value_es_repository import ValueESRepository
 from app.services.meta_knowleddge_service import MetaKnowledgeService
 
 
@@ -59,5 +60,10 @@ if __name__ == '__main__':
     parser = ArgumentParser()
     parser.add_argument('-c', '--conf')
     args = parser.parse_args()
-    config_path = Path(args.conf)
+    if args.conf:
+        config_path = Path(args.conf)
+    else:
+        config_path = main.get_project_path() / 'conf' / 'meta_config.yaml'
+    # 检查 config_path
+    assert config_path.exists(), f"配置文件 {config_path} 不存在"
     asyncio.run(build(config_path))

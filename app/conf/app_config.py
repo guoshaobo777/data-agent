@@ -46,8 +46,6 @@ class QdrantConfig:
 
 @dataclass
 class EmbeddingConfig:
-    host: str
-    port: int
     model: str
 
 
