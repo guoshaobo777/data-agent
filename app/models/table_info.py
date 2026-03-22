@@ -6,7 +6,6 @@ from app.models.base import Base
 
 class TableInfoMySQL(Base):
     __tablename__ = "table_info"
-    __table_args__ = {"schema": "dw"}
 
     id: Mapped[str] = mapped_column(
         String(64),

@@ -72,7 +72,7 @@ class MetaKnowledgeService:
         for table in meta_config.tables:
             # 构造 TableInfo
             table_info = TableInfo(
-                id=table.id,
+                id=table.name,
                 name=table.name,
                 role=table.role,
                 description=table.description
@@ -106,6 +106,7 @@ class MetaKnowledgeService:
         return column_infos
 
     async def _save_columns_info_to_qdrant(self, column_infos:list[ColumnInfo]):
+        # return
         # 确保 column_info 的 collection 存在
         await self.column_qdrant_repository.ensure_collection_exists()
         # 构造待保存的数据
@@ -152,6 +153,7 @@ class MetaKnowledgeService:
         await self.column_qdrant_repository.upsert(ids, embeddings, payloads)
 
     async def _save_value_info_to_es(self, meta_config: MetaConfig, column_infos:list[ColumnInfo]):
+        return
         # 确保 index 存在
         await self.value_es_repository.ensure_index_exists()
         # 获取需要同步取值的列
@@ -184,6 +186,7 @@ class MetaKnowledgeService:
         await self.value_es_repository.index(value_infos)
 
     async def _save_metrics_to_meta_db(self, meta_config: MetaConfig):
+        return
         metric_infos: list[MetricInfo] = []
         column_metrics: list[ColumnMetric] = []
         for metric in meta_config.metrics:
@@ -200,6 +203,7 @@ class MetaKnowledgeService:
             await self.meta_mysql_repository.save_column_metrics(column_metrics)
 
     async def _save_metrics_info_to_qdrant(self, metric_infos: list[MetricInfo]):
+        return
         # 确保 metric_info 的 collection 存在
         await self.metric_qdrant_repository.ensure_collection_exists()
         # 构造待保存的数据
