@@ -153,7 +153,6 @@ class MetaKnowledgeService:
         await self.column_qdrant_repository.upsert(ids, embeddings, payloads)
 
     async def _save_value_info_to_es(self, meta_config: MetaConfig, column_infos:list[ColumnInfo]):
-        return
         # 确保 index 存在
         await self.value_es_repository.ensure_index_exists()
         # 获取需要同步取值的列
@@ -185,25 +184,25 @@ class MetaKnowledgeService:
         # 批量保存到 ElasticSearch
         await self.value_es_repository.index(value_infos)
 
-    async def _save_metrics_to_meta_db(self, meta_config: MetaConfig):
-        return
+    async def _save_metrics_to_meta_db(self, meta_config: MetaConfig) -> list[MetricInfo]:
         metric_infos: list[MetricInfo] = []
         column_metrics: list[ColumnMetric] = []
         for metric in meta_config.metrics:
-            metric_info = MetricInfo(id=metric.id, name=metric.name, description=metric.description,
+            metric_info = MetricInfo(id=metric.name, name=metric.name, description=metric.description,
                               relevant_columns=metric.relevant_columns, alias=metric.alias)
             metric_infos.append(metric_info)
 
             for relevant_column in metric.relevant_columns:
-                column_metric = ColumnMetric(column_id=relevant_column, metric_id=metric.id)
+                column_metric = ColumnMetric(column_id=relevant_column, metric_id=metric.name)
                 column_metrics.append(column_metric)
         # 保存到元数据库
         async with self.meta_mysql_repository.session.begin():
             await self.meta_mysql_repository.save_metric_infos(metric_infos)
             await self.meta_mysql_repository.save_column_metrics(column_metrics)
 
+        return metric_infos
+
     async def _save_metrics_info_to_qdrant(self, metric_infos: list[MetricInfo]):
-        return
         # 确保 metric_info 的 collection 存在
         await self.metric_qdrant_repository.ensure_collection_exists()
         # 构造待保存的数据
