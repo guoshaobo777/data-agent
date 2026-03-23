@@ -21,6 +21,10 @@ class DWMySQLRepository:
         result = await self.session.execute(text(sql))
         return result.scalars().fetchall()
 
+    async def execute_sql(self, sql: str):
+        result = await self.session.execute(text(sql))
+        return [dict(row) for row in result.mappings().fetchall()]
+
 
 if __name__ == "__main__":
     dw_mysql_client_manager.init()

@@ -1,3 +1,4 @@
+from dataclasses import dataclass
 from typing import TypedDict
 
 from app.entities.column_info import ColumnInfo

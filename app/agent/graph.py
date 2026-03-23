@@ -1,3 +1,5 @@
+import asyncio
+
 from langgraph.constants import START, END
 from langgraph.graph import StateGraph
 
@@ -15,6 +17,15 @@ from app.agent.nodes.recall_metric import recall_metric
 from app.agent.nodes.recall_value import recall_value
 from app.agent.nodes.validate_sql import validate_sql
 from app.agent.state import DataAgentState
+from app.clients.embedding_client_manager import embedding_client_manager
+from app.clients.es_client_manager import es_client_manager
+from app.clients.mysql_client_manager import dw_mysql_client_manager, meta_mysql_client_manager
+from app.clients.qdrant_client_manager import qdrant_client_manager
+from app.repositories.es.value_es_repository import ValueESRepository
+from app.repositories.mysql.dw.dw_mysql_repository import DWMySQLRepository
+from app.repositories.mysql.meta.meta_mysql_repository import MetaMySQLRepository
+from app.repositories.qdrant.column_qdrant_repository import ColumnQdrantRepository
+from app.repositories.qdrant.metric_qdrant_repository import MetricQdrantRepository
 
 graph_builder = StateGraph(
     state_schema=DataAgentState,
@@ -35,6 +46,11 @@ graph_builder.add_node("validate_sql", validate_sql)
 graph_builder.add_node("correct_sql", correct_sql)
 graph_builder.add_node("execute_sql", execute_sql)
 
+def decide_next_node(state: DataAgentState):
+    if state["error"] is None:
+        return "execute_sql"
+    else:
+        return "correct_sql"
 
 # 添加边
 graph_builder.add_edge(START, "extract_keywords")
@@ -50,12 +66,6 @@ graph_builder.add_edge("filter_metric", "add_extra_context")
 graph_builder.add_edge("filter_table", "add_extra_context")
 graph_builder.add_edge("add_extra_context", "generate_sql")
 graph_builder.add_edge("generate_sql", "validate_sql")
-
-def decide_next_node(state: DataAgentState):
-    if state["error"] is None:
-        return "execute_sql"
-    else:
-        return "correct_sql"
 graph_builder.add_conditional_edges(
     "validate_sql",
     decide_next_node,
@@ -71,3 +81,40 @@ graph_builder.add_edge("execute_sql", END)
 
 # 编译图
 graph = graph_builder.compile()
+
+if __name__ == "__main__":
+    async def test():
+        # 初始化客户端
+        embedding_client_manager.init()
+        es_client_manager.init()
+        dw_mysql_client_manager.init()
+        meta_mysql_client_manager.init()
+        qdrant_client_manager.init()
+
+        # 创建langgraph运行时上下文
+        async with meta_mysql_client_manager.session_factory() as meta_session, \
+                dw_mysql_client_manager.session_factory() as dw_session:
+            # 创建数据层Repository
+            meta_mysql_repository = MetaMySQLRepository(meta_session)
+            dw_mysql_repository = DWMySQLRepository(dw_session)
+            column_qdrant_repository = ColumnQdrantRepository(qdrant_client_manager.client)
+            metric_qdrant_repository = MetricQdrantRepository(qdrant_client_manager.client)
+            value_es_repository = ValueESRepository(es_client_manager.client)
+
+            context = DataAgentContext(
+                embedding_client=embedding_client_manager.client,
+                column_qdrant_repository=column_qdrant_repository,
+                metric_qdrant_repository=metric_qdrant_repository,
+                value_es_repository=value_es_repository,
+                meta_mysql_repository=meta_mysql_repository,
+                dw_mysql_repository=dw_mysql_repository
+            )
+            state = DataAgentState(query="统计去年各地区的销售总额")
+            async for chunk in graph.astream(input=state, context=context, stream_mode="custom"):
+                print(chunk)
+        # 关闭客户端
+        await qdrant_client_manager.close()
+        await es_client_manager.close()
+        await meta_mysql_client_manager.close()
+        await dw_mysql_client_manager.close()
+    asyncio.run(test())
