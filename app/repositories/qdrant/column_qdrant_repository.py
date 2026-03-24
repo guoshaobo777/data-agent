@@ -1,6 +1,6 @@
 from dataclasses import asdict
 
-from qdrant_client import QdrantClient
+from qdrant_client import AsyncQdrantClient
 from qdrant_client.http.models import PointStruct
 from qdrant_client.models import Distance,VectorParams
 
@@ -11,14 +11,14 @@ from app.entities.column_info import ColumnInfo
 class ColumnQdrantRepository:
     collection_name: str = "data-agent-column"
 
-    def __init__(self, qdrant_client: QdrantClient):
-        self.qdrant_client = qdrant_client
+    def __init__(self, client: AsyncQdrantClient):
+        self.client = client
 
     async def ensure_collection_exists(self):
-        if not await self.qdrant_client.collection_exists(
+        if not await self.client.collection_exists(
             self.collection_name
         ):
-            await self.qdrant_client.create_collection(
+            await self.client.create_collection(
                 collection_name=self.collection_name,
                 vectors_config=VectorParams(
                     size=app_config.qdrant.embedding_size,
@@ -42,18 +42,17 @@ class ColumnQdrantRepository:
                 )
                 for id, embeddings, payloads in batch
             ]
-            await self.qdrant_client.upsert(
+            await self.client.upsert(
                 collection_name=self.collection_name,
                 points=batch_points
             )
 
     async def search(self, embedding: list[float], score_threshold: float = 0.6, limit: int = 5) -> list[ColumnInfo]:
-        result = await self.qdrant_client.query_points(
+        result = await self.client.query_points(
             collection_name=self.collection_name,
             query=embedding,
             limit=limit,
-            score_threshold=score_threshold,
-            with_payload=True
+            score_threshold=score_threshold
         )
-        return [ColumnInfo(**payload) for payload in result.result]
+        return [ColumnInfo(**point.payload) for point in result.points]
 

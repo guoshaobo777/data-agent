@@ -1,9 +1,16 @@
+import asyncio
+
+from langchain_core.output_parsers import JsonOutputParser
+from langchain_core.prompts import PromptTemplate
 from langgraph.runtime import Runtime
 from loguru import logger
 
 from app.agent.context import DataAgentContext
+from app.agent.llm import llm
 from app.agent.state import DataAgentState
+from app.agent.test_suit import test_node_framework
 from app.entities.column_info import ColumnInfo
+from app.prompt.prompt_loader import load_prompt
 
 
 async def recall_column(state: DataAgentState, runtime: Runtime[DataAgentContext]):
@@ -18,9 +25,18 @@ async def recall_column(state: DataAgentState, runtime: Runtime[DataAgentContext
 
     try:
         # 使用 LLM 扩展关键词
+        prompt = PromptTemplate(
+            template=load_prompt("extend_keywords_for_column_recall"),
+            input_variables=["query"]
+        )
+        output_parser = JsonOutputParser()
 
+        chain = prompt | llm | output_parser
+
+        result = await chain.ainvoke({"query": query})
         # 使用扩展后的关键词 召回 字段信息
         retrieved_columns_map: dict[str, ColumnInfo] = {}
+        keywords = list(set(keywords + result))
         logger.info(f"召回字段信息扩展关键词: {keywords}")
         for keyword in keywords:
             # 转换成向量
@@ -45,10 +61,10 @@ async def recall_column(state: DataAgentState, runtime: Runtime[DataAgentContext
         raise e
 
 if __name__ == '__main__':
-    async def test():
+    async def test_recall_column():
         state = {
             "query": "统计去年各个地区的销售额",
             "keywords": ["统计", "地区", "销售额", "统计去年各个地区的销售额"]
         }
-        runtime = Runtime[DataAgentContext]()
-        result = await recall_column(state, runtime)
+        await test_node_framework(state, recall_column)
+    asyncio.run(test_recall_column())

@@ -66,7 +66,7 @@ async def test_node_framework(state: DataAgentState, func: Callable):
         context_schema=DataAgentContext,
     )
 
-    graph_builder.add_node("extract_keywords", func)
+    graph_builder.add_node(func.__name__, func)
     graph_builder.add_edge(START, func.__name__)
     graph_builder.add_edge(func.__name__, END)
     graph = graph_builder.compile()
