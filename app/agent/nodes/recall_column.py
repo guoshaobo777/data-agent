@@ -43,4 +43,12 @@ async def recall_column(state: DataAgentState, runtime: Runtime[DataAgentContext
         writer({"type": "progress", "step": "召回字段", "status": "error"})
         logger.error(f"召回字段失败: {str(e)}")
         raise e
-    return
+
+if __name__ == '__main__':
+    async def test():
+        state = {
+            "query": "统计去年各个地区的销售额",
+            "keywords": ["统计", "地区", "销售额", "统计去年各个地区的销售额"]
+        }
+        runtime = Runtime[DataAgentContext]()
+        result = await recall_column(state, runtime)

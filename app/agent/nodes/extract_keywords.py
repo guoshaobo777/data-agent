@@ -5,6 +5,7 @@ from langgraph.runtime import Runtime
 from loguru import logger
 
 from app.agent.context import DataAgentContext
+from app.agent.test_suit import test_node_framework
 from app.agent.state import DataAgentState
 
 
@@ -38,11 +39,9 @@ async def extract_keywords(state: DataAgentState, runtime: Runtime[DataAgentCont
     return {"keywords": keywords}
 
 if __name__ == '__main__':
-    async def test():
+    async def test_extract_keywords():
         state = {
-            "query": "统计去年各个地区的销售额"
+            "query": "统计去年各地区的销售总额"
         }
-        runtime = Runtime[DataAgentContext]()
-        result = await extract_keywords(state, runtime)
-        print(result)
-    asyncio.run(test())
+        await test_node_framework(state, extract_keywords)
+    asyncio.run(test_extract_keywords())

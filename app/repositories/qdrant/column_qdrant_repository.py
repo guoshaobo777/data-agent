@@ -50,7 +50,7 @@ class ColumnQdrantRepository:
     async def search(self, embedding: list[float], score_threshold: float = 0.6, limit: int = 5) -> list[ColumnInfo]:
         result = await self.qdrant_client.query_points(
             collection_name=self.collection_name,
-            query_vector=embedding,
+            query=embedding,
             limit=limit,
             score_threshold=score_threshold,
             with_payload=True
