@@ -1,7 +1,7 @@
 from dataclasses import asdict
 
 from qdrant_client import QdrantClient
-from qdrant_client.http.models import Distance, VectorParams, PointStruct
+from qdrant_client.http.models import Distance, VectorParams, PointStruct, QueryResponse
 
 from app.conf.app_config import app_config
 from app.entities.metric_info import MetricInfo
@@ -45,3 +45,13 @@ class MetricQdrantRepository:
                 collection_name=self.collection_name,
                 points=batch_points
             )
+
+    async def search(self, embedding: list[float], score_threshold: float = 0.6, limit: int = 5) -> list[MetricInfo]:
+        result: QueryResponse = await self.qdrant_client.query_points(
+            collection_name=self.collection_name,
+            query=embedding,
+            limit=limit,
+            score_threshold=score_threshold,
+            with_payload=True
+        )
+        return [MetricInfo(**point.payload) for point in result.points]
