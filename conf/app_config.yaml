@@ -36,8 +36,11 @@ es:
   port: 9200
   index_name: data_agent
 
-
 llm:
-  model_name: google/gemini-2.5-flash
-  api_key: sk-FBxV3VvQFWIZhBnOF2D87947AfD44300Be45Cb31Db3f5c39
-  base_url: http://43.165.190.64:3000/v1
+  model_name: qwen3.5-flash
+  api_key: sk-3ef9f81c8e1948459a34d08cc0722818
+  base_url: https://dashscope.aliyuncs.com/compatible-mode/v1
+#llm:
+#  model_name: google/gemini-2.5-flash
+#  api_key: sk-FBxV3VvQFWIZhBnOF2D87947AfD44300Be45Cb31Db3f5c39
+#  base_url: http://43.165.190.64:3000/v1

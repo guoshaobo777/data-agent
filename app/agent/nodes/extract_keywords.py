@@ -31,11 +31,9 @@ async def extract_keywords(state: DataAgentState, runtime: Runtime[DataAgentCont
             "l",   # 常用固定短语
          )
     keywords = jieba.analyse.extract_tags(query, allowPOS=allow_pos)
-
+    keywords = list(set(keywords + [query]))    # 合并查询和关键词
     writer({"type": "progress", "step": "抽取关键词", "status": "success"})
     logger.info(f"抽取关键字: {keywords}")
-
-    keywords = list(set(keywords + [query]))    # 合并查询和关键词
     return {"keywords": keywords}
 
 if __name__ == '__main__':
