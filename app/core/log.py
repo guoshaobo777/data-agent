@@ -21,9 +21,7 @@ def inject_request_id(record):
     record["extra"]["request_id"] = request_id
 
 logger.remove()
-
-# 给日志打补丁，使其支持注入 request_id
-logger = logger.patch(inject_request_id)
+logger.configure(patcher=inject_request_id)
 if app_config.logging.console.enable:
     logger.add(
         sink=sys.stdout,
