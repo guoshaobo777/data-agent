@@ -4,8 +4,8 @@ from pathlib import Path
 
 from loguru import logger
 
-from app.agent.context import request_id_ctx_var
 from app.conf.app_config import app_config
+from app.core.context import request_id_ctx_var
 
 log_format = (
     "<green>{time:YYYY-MM-DD HH:mm:ss.SSS}</green> | "
