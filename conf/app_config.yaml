@@ -11,20 +11,20 @@ logging:
 
 db_meta:
   host: localhost
-  port: 3306
+  port: 3307
   user: root
   password: root1234
   database: meta
 
 db_dw:
   host: localhost
-  port: 3306
+  port: 3307
   user: root
   password: root1234
   database: dw
 
 qdrant:
-  host: 118.25.151.69
+  host: localhost
   port: 6333
   embedding_size: 1024
 
@@ -32,7 +32,7 @@ embedding:
   model: text-embedding-v4
 
 es:
-  host: 118.25.151.69
+  host: localhost
   port: 9200
   index_name: data_agent
 

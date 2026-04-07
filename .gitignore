@@ -1,0 +1,44 @@
+# macOS
+.DS_Store
+
+# Python bytecode/cache
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environments
+.venv/
+venv/
+env/
+myenv/
+
+# Build/package artifacts
+build/
+dist/
+*.egg-info/
+.eggs/
+pip-wheel-metadata/
+
+# Test and coverage
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+
+# Type/check/lint caches
+.mypy_cache/
+.ruff_cache/
+.pyre/
+
+# Logs
+logs/
+*.log
+
+# IDE/editor
+.idea/
+.vscode/
+
+# Local secrets
+.env
+.env.*
+

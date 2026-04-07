@@ -24,6 +24,10 @@ class MetaMySQLRepository:
         ]
         self.session.add_all(models)
 
+    async def clear_table_and_column_infos(self):
+        await self.session.execute(text("delete from column_info"))
+        await self.session.execute(text("delete from table_info"))
+
     async def save_column_infos(self, column_infos: list[ColumnInfo]):
         models = [
             ColumnInfoMapper.to_model(column_info)
@@ -34,6 +38,10 @@ class MetaMySQLRepository:
     async def save_metric_infos(self, metric_infos: list[MetricInfo]):
         models = [MetricInfoMapper.to_model(metric_info) for metric_info in metric_infos]
         self.session.add_all(models)
+
+    async def clear_metric_infos(self):
+        await self.session.execute(text("delete from column_metric"))
+        await self.session.execute(text("delete from metric_info"))
 
     async def save_column_metrics(self, column_metrics: list[ColumnMetric]):
         models = [ColumnMetricMapper.to_model(column_metric) for column_metric in column_metrics]

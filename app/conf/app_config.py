@@ -1,7 +1,9 @@
 # 日志配置
 from dataclasses import dataclass
+import os
 
 from omegaconf import OmegaConf
+from dotenv import load_dotenv
 
 import main
 
@@ -74,8 +76,16 @@ class AppConfig:
     llm: LLMConfig
 
 
-config_file = main.get_project_path() / 'conf' / 'app_config.yaml'
+project_path = main.get_project_path()
+load_dotenv(project_path / ".env")
+
+config_file = project_path / 'conf' / 'app_config.yaml'
 context = OmegaConf.load(config_file)
+
+# 优先使用环境变量，避免在配置文件中明文存储密钥
+dashscope_api_key = os.getenv("DASHSCOPE_API_KEY") or os.getenv("DASH_SCOPE_API_KEY")
+if dashscope_api_key:
+    context.llm.api_key = dashscope_api_key
+
 schema = OmegaConf.structured(AppConfig)
 app_config: AppConfig = OmegaConf.to_object(OmegaConf.merge(schema, context))
-print(app_config)

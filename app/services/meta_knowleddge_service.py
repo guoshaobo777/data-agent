@@ -100,6 +100,8 @@ class MetaKnowledgeService:
 
         # 保存 表信息 和 字段信息 到元数据数据库
         async with self.meta_mysql_repository.session.begin():
+            # 支持重复构建：每次重建前先清理旧元数据
+            await self.meta_mysql_repository.clear_table_and_column_infos()
             await self.meta_mysql_repository.save_table_infos(table_infos)
             await self.meta_mysql_repository.save_column_infos(column_infos)
 
@@ -197,6 +199,8 @@ class MetaKnowledgeService:
                 column_metrics.append(column_metric)
         # 保存到元数据库
         async with self.meta_mysql_repository.session.begin():
+            # 支持重复构建：避免重复主键冲突
+            await self.meta_mysql_repository.clear_metric_infos()
             await self.meta_mysql_repository.save_metric_infos(metric_infos)
             await self.meta_mysql_repository.save_column_metrics(column_metrics)
 

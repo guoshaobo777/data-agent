@@ -15,11 +15,19 @@ class MysqlClientManager:
 
     def _get_async_engine_url(self):
         # 使用 asyncmy 作为驱动
-        return f"mysql+asyncmy://{self.db_config.user}:{self.db_config.password}@{self.db_config.host}:{self.db_config.port}/{self.db_config.database}"
+        return (
+            f"mysql+asyncmy://{self.db_config.user}:{self.db_config.password}"
+            f"@{self.db_config.host}:{self.db_config.port}/{self.db_config.database}"
+            "?charset=utf8mb4"
+        )
 
     def _get_sync_engine_url(self):
         # 使用 pymysql 作为驱动
-        return f"mysql+pymysql://{self.db_config.user}:{self.db_config.password}@{self.db_config.host}:{self.db_config.port}/{self.db_config.database}"
+        return (
+            f"mysql+pymysql://{self.db_config.user}:{self.db_config.password}"
+            f"@{self.db_config.host}:{self.db_config.port}/{self.db_config.database}"
+            "?charset=utf8mb4"
+        )
 
     def init(self):
         self.engine = create_async_engine(

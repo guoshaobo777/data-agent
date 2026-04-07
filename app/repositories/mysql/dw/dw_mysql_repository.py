@@ -1,4 +1,5 @@
 import asyncio
+from decimal import Decimal
 
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -19,7 +20,15 @@ class DWMySQLRepository:
     async def get_column_values(self, table_name:str, column_name:str, limit: int):
         sql = f"select distinct {column_name} from `{table_name}` limit {limit}"
         result = await self.session.execute(text(sql))
-        return result.scalars().fetchall()
+        values = result.scalars().fetchall()
+        normalized_values = []
+        for value in values:
+            # MySQL DECIMAL 在后续写入 JSON 字段时不可直接序列化
+            if isinstance(value, Decimal):
+                normalized_values.append(float(value))
+            else:
+                normalized_values.append(value)
+        return normalized_values
 
     async def execute_sql(self, sql: str):
         result = await self.session.execute(text(sql))

@@ -2,6 +2,7 @@ from dataclasses import asdict
 
 from qdrant_client import QdrantClient
 from qdrant_client.http.models import Distance, VectorParams, PointStruct, QueryResponse
+from loguru import logger
 
 from app.conf.app_config import app_config
 from app.entities.metric_info import MetricInfo
@@ -47,11 +48,18 @@ class MetricQdrantRepository:
             )
 
     async def search(self, embedding: list[float], score_threshold: float = 0.6, limit: int = 5) -> list[MetricInfo]:
-        result: QueryResponse = await self.qdrant_client.query_points(
-            collection_name=self.collection_name,
-            query=embedding,
-            limit=limit,
-            score_threshold=score_threshold,
-            with_payload=True
-        )
-        return [MetricInfo(**point.payload) for point in result.points]
+        try:
+            result: QueryResponse = await self.qdrant_client.query_points(
+                collection_name=self.collection_name,
+                query=embedding,
+                limit=limit,
+                score_threshold=score_threshold,
+                with_payload=True
+            )
+            return [MetricInfo(**point.payload) for point in result.points]
+        except Exception as e:
+            # Qdrant collection 未初始化时降级为空，避免整条链路被中断
+            if self.collection_name in str(e) and "doesn't exist" in str(e):
+                logger.warning(f"collection 不存在: {self.collection_name}，跳过指标召回")
+                return []
+            raise
